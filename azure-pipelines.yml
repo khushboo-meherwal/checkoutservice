@@ -14,7 +14,7 @@ pool:
 variables:
   ImageName: '173129/checkoutserviice:$(Build.BuildId)'
 
-stages:
+
 stages:
 - stage: Sonar
   jobs:
