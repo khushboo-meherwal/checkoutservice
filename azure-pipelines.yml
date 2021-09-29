@@ -13,8 +13,31 @@ pool:
  
 variables:
   ImageName: '173129/checkoutserviice:$(Build.BuildId)'
- 
+
 stages:
+stages:
+- stage: Sonar
+  jobs:
+  - job: Sonar
+    steps:
+     
+    - task: SonarQubePrepare@4
+      inputs:
+        SonarQube: 'sonarqube'
+        scannerMode: 'CLI'
+        configMode: 'manual'
+        cliProjectKey: 'checkoutservice'
+        cliProjectName: 'checkoutservice'
+        cliSources: 'src'
+    
+    
+  #  - task: SonarQubeAnalyze@4
+  #    displayName: 'Run SonarQube Scan'
+
+    - task: SonarQubePublish@4
+      inputs:
+        pollingTimeoutSec: '300'
+
 - stage: Build
   displayName: Build image
   jobs:  
@@ -41,3 +64,31 @@ stages:
         command: 'Push an image'
         imageName: '$(ImageName)'
       condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    - task: KubectlInstaller@0
+      inputs:
+        kubectlVersion: 'latest'
+
+    
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: 'sed -i ''s#containerImage#$(ImageName)#g'' checkoutservice.yaml'
+    
+    - task: Kubernetes@1
+      inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: 'kubernetes'
+        namespace: 'khushboo'
+        command: 'apply'
+        useConfigurationFile: true
+        configuration: 'checkoutservice.yaml'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
+ 
+    
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/TEST-*.xml'
+        mergeTestResults: true
+        testRunTitle: 'checkoutservice'
