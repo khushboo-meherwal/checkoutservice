@@ -55,7 +55,13 @@ stages:
         includeLatestTag: true
         useDefaultContext: false
         buildContext: '.'
-     
+
+- stage: Image push
+  displayName: Image push
+  jobs:  
+  - job: Pushing
+    displayName: Push Docker image
+    steps:     
     - task: Docker@1
       displayName: 'Push the Docker image to Dockerhub'
       inputs:
@@ -64,6 +70,13 @@ stages:
         command: 'Push an image'
         imageName: '$(ImageName)'
       condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+
+- stage: Deploy
+  displayName: Deploy
+  jobs:  
+  - job: Deploy
+    displayName: Deploy
+    steps:
     - task: KubectlInstaller@0
       inputs:
         kubectlVersion: 'latest'
