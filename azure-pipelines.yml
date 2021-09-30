@@ -56,7 +56,7 @@ stages:
         useDefaultContext: false
         buildContext: '.'
 
-- stage: Image push
+- stage: Imagepush
   displayName: Image push
   jobs:  
   - job: Pushing
