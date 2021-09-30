@@ -56,12 +56,6 @@ stages:
         useDefaultContext: false
         buildContext: '.'
 
-- stage: Imagepush
-  displayName: Image push
-  jobs:  
-  - job: Pushing
-    displayName: Push Docker image
-    steps:     
     - task: Docker@1
       displayName: 'Push the Docker image to Dockerhub'
       inputs:
